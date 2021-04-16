@@ -40,7 +40,16 @@ const getDir = (path) => {
     return output
 }
 
+const getFile = (path) => {
+    if(!fs.existsSync(path)){
+        return {Error:'Path Does Not Exist'}
+    }
+
+    return fs.readFileSync(path).toString()
+}
+
 module.exports = {
     getDrives,
     getDir,
+    getFile,
 }
