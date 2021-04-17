@@ -45,11 +45,39 @@ const getFile = (path) => {
         return {Error:'Path Does Not Exist'}
     }
 
-    return fs.readFileSync(path).toString()
+    const file = fs.readFileSync(path)
+    const fileName = path.replace(/^.*[\\\/]/, '')
+
+    if(checkFileType(['png','jpeg','jpg'],fileName)){
+        return file.toString('base64')
+    }
+
+    return file.toString()
 }
+
+const checkFileType = (extensions = [],fileName) => {
+    let startPartten = '.('
+    let endPartten = ')$'
+
+    extensions.forEach((extension,index) => {
+        startPartten += extension
+
+        if(index !== extensions.length-1){
+            startPartten += '|'
+        }
+    })
+
+    const parrten = startPartten + endPartten
+    const regex = new RegExp(parrten,'i')
+
+    return regex.test(fileName)
+}
+
+getFile('C:/Users/Ilay/Pictures/terriaBackround1.jpg')
 
 module.exports = {
     getDrives,
     getDir,
     getFile,
+    checkFileType,
 }

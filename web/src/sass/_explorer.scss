@@ -28,21 +28,25 @@
     outline: none;
 }
 
-.explorer-goBack{
-    width: 5rem;
-    height: 5rem;
-    background-color: #F1F1F1;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    position: fixed;
+.explorer-controls{
+    position: absolute;
     top: 1.3rem;
     left: 1.3rem;
     user-select: none;
-    cursor: pointer;
     
-    span{
-        font-size: 3.5rem;
+    button{
+        cursor: pointer;
+        height: 5rem;
+        width: 5rem;
+        border-radius: 50%;
+
+        span{
+            font-size: 3.5rem;
+        }
+
+        &:not(:last-child){
+            margin-right: 2rem;
+        }
     }
 }
 
@@ -52,5 +56,9 @@
 }
 
 .color-file{
-    color: #000;
+    color: rgb(146, 143, 143);
+}
+
+.color-image{
+    color: rgb(28, 83, 236);
 }

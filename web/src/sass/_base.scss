@@ -8,6 +8,10 @@
     color: #000;
 }
 
+#sim-download-btn{
+    display: none;
+}
+
 body,html{
     font-size: 62.5%;
 }
@@ -42,4 +46,13 @@ button{
     padding: 2.8rem 2rem;
     overflow-y: scroll;
     overflow-x: hidden;
+
+    img{
+        width: 100%;
+    }
+}
+
+.title{
+    font-size: 3rem;
+    font-weight: 700;
 }
