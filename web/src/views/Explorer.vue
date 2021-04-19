@@ -26,7 +26,6 @@
     </div>
     <!-- controls -->
     <div class="explorer-controls">
-      <!-- go back arrow -->
       <button @click="goBack" v-if="path">
         <span class="material-icons">west</span>
       </button>
@@ -47,7 +46,7 @@ export default {
   name: 'explorer',
   data(){
     return{
-      socket:io('ws://localhost:3000'),
+      socket:io(),
       dir:[],
       drives:[],
       path:'',

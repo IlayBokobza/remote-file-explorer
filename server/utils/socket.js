@@ -2,6 +2,7 @@ let client = null
 let admin = null
 const socketEvents = (io) => {
     io.on('connection',socket => {
+        console.log('someone connected to server')
         socket.emit('message','Successfully connected to server.')
 
         //sets client id
