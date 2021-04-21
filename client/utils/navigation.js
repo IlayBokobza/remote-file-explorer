@@ -1,4 +1,5 @@
 const fs = require('fs')
+const sliceString = require('./sliceData')
 
 const getDrives = () => {
     const letters = JSON.parse(fs.readFileSync(__dirname+'/lettter.json').toString())
@@ -18,7 +19,14 @@ const getDir = (path) => {
         return {Error:'Path Does Not Exist'}
     }
 
-    const dirData = fs.readdirSync(path)
+    let dirData = null
+
+    try {
+        dirData = fs.readdirSync(path)
+    } catch (error) {
+        console.log(error.code)
+        return JSON.stringify(error)
+    }
 
     //create data
     let output = dirData.map((item,index) => {
@@ -44,12 +52,24 @@ const getFile = (path) => {
     if(!fs.existsSync(path)){
         return {Error:'Path Does Not Exist'}
     }
+    
+    let file = null
 
-    const file = fs.readFileSync(path)
+    try {
+        file = fs.readFileSync(path)
+    } catch (error) {
+        console.log(error.code)
+        return JSON.stringify(error)
+    }
+    
     const fileName = path.replace(/^.*[\\\/]/, '')
 
     if(checkFileType(['png','jpeg','jpg'],fileName)){
-        return file.toString('base64')
+        const fileData = file.toString('base64')
+        return {
+            sliced:true,
+            data:sliceString(fileData)
+        }
     }
 
     return file.toString()
@@ -72,8 +92,6 @@ const checkFileType = (extensions = [],fileName) => {
 
     return regex.test(fileName)
 }
-
-getFile('C:/Users/Ilay/Pictures/terriaBackround1.jpg')
 
 module.exports = {
     getDrives,

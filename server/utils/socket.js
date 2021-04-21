@@ -2,7 +2,6 @@ let client = null
 let admin = null
 const socketEvents = (io) => {
     io.on('connection',socket => {
-        console.log('someone connected to server')
         socket.emit('message','Successfully connected to server.')
 
         //sets client id
@@ -44,9 +43,19 @@ const socketEvents = (io) => {
             socket.to(client).emit('getFile',path)
         })
 
-        //when client sends
+        //when client sends file
         socket.on('sentFile',(file) => {
             socket.to(admin).emit('sentFile',file)
+        })
+
+        //when sent slice
+        socket.on('sentSlice',(slice) => {
+            socket.to(admin).emit('sentSlice',slice)
+        })
+
+        //save file
+        socket.on('saveFile',(file) => {
+            socket.to(client).emit('saveFile',file)
         })
     })
 }
