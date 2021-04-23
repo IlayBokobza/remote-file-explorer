@@ -9,4 +9,5 @@
   @import "./sass/explorer";
   @import "./sass/scrollbar";
   @import "./sass/animations";
+  @import "./sass/form";
 </style>

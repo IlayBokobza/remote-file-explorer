@@ -33,13 +33,13 @@
       <button title="Go Back" @click="goBack" v-if="path">
         <span class="material-icons">west</span>
       </button>
-      <button title="Refresh" @click="refresh($event)">
+      <button title="Refresh" id="explorer-refresh-btn" @click="refresh">
         <span class="material-icons">autorenew</span>
       </button>
       <button title="Download" v-if="showFile" @click="downloadFile">
         <span class="material-icons">download</span>
       </button>
-      <button title="Save" v-if="showFile && !checkFileType(['png','jpg','jpeg']) && !checkFileType(noPreview,path)" @click="save">
+      <button title="Save" v-if="showFile && !checkFileType(['png','jpg','jpeg'],path) && !checkFileType(noPreview,path)" @click="save">
         <span class="material-icons">save</span>
       </button>
     </div>
@@ -64,7 +64,7 @@ export default {
       slices:[],
       loaderStage:0,
       noPreview:['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
-      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar']
+      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat']
     }
   },
   created(){
@@ -85,6 +85,9 @@ export default {
           break;
         case 'a':
           this.goBack()
+          break;
+        case 'r':
+          this.refresh()
           break;
       }
     })
@@ -220,7 +223,7 @@ export default {
 
           return regex.test(fileName)
       },
-      refresh(e){
+      refresh(){
         //refreshes
         if(this.path){
           this.setPath(this.path)
@@ -228,7 +231,7 @@ export default {
           this.socket.emit('getDrives')
         }
         //animates btn
-        const ref = e.target
+        const ref = document.getElementById('explorer-refresh-btn')
         ref.classList.add('spin')
         setTimeout(() => {ref.classList.remove('spin')},200)
       }

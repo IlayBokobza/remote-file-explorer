@@ -1,6 +1,7 @@
 const express = require('express')
 const http = require('http')
 const cors = require('cors')
+const socketIo = require('socket.io')
 
 //start express
 const app = express()
@@ -8,18 +9,26 @@ const server = http.createServer(app)
 
 //confing express to parse json and to allow cors
 app.use(express.json())
-app.use(cors())
+
+//config cors
+const allowedUrls = ['localhost:3000','localhost:8080','connectapp.ilaydev.com']
+app.use(cors({
+    origin:allowedUrls
+}))
 
 //start socket
-const socketIo = require('socket.io')
 const io = socketIo(server,{
     cors:{
-        origin:'*'
+        origin:allowedUrls
     }
 })
-//sets socket events
-require('./utils/socket')(io)
 
+//connect to db
+require('./utils/db')
+
+//sets socket events and user route
+require('./utils/socket')(io)
+app.use(require('./utils/userRoutes'))
 
 //port for prod and dev
 const port = process.env.PORT || 3000
