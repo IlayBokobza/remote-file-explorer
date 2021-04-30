@@ -1,28 +1,65 @@
-let client = null
-let admin = null
+const User = require('./userModel')
+const jwt = require('jsonwebtoken')
 const socketEvents = (io) => {
-    io.on('connection',socket => {
+    io.on('connection',(socket) => {
+        //connetion vars
+        let me = null //should be 'admin' or 'client'
+        let client = null
+        let admin = null
+        let user = null
+        let code = null
+
         socket.emit('message','Successfully connected to server.')
 
-        //sets client id
-        socket.on('setClient',() => {
+        //make client online
+        socket.on('checkConnection',(userCode,cb) => {
             client = socket.id
-            console.log(`Successfully set client's id to "${client}"`)
+            me = 'client'
+            code = userCode
+            cb()
         })
 
         //sets admin id
-        socket.on('setAdmin',() => {
+        socket.on('setAdmin',async (token,cb) => {
+            const decoded = jwt.verify(token,'secretTokenKey')
+            user = await User.findOne({ _id: decoded._id, 'tokens.token':token })
+
+            if(!user){
+                return cb({error:'No user Found'})
+            }
+            
             admin = socket.id
-            console.log(`Successfully set admin's id to "${admin}"`)
+            me = 'admin'
+            console.log(`Successfully added an admin`)
+        })
+
+        //sets client
+        socket.on('selectClient',(clientDbId,cb) => {
+            const copmuterIndex = user.computers.findIndex(pc => `${pc._id}` === clientDbId)
+
+            if(copmuterIndex === -1){
+                return cb({error:'No pc with that id was found.'})
+            }
+
+            const computer = user.computers[copmuterIndex]
+
+            if(!computer.socketId){
+                return cb({error:'Computer not connected'})
+            }
+
+            client = computer.socketId
+            console.log('a client was selected')
         })
 
         //gets drive
         socket.on('getDrives',() => {
-            socket.to(client).emit('getDrives')
+            console.log(client)
+            socket.to(client).emit('getDrives',admin)
         })
 
         //when the client sends back the drives
-        socket.on('sentDrives',(drives) => {
+        socket.on('sentDrives',(drives,adminId) => {
+            admin = adminId
             console.log('Recived drives from client.',drives)
             socket.to(admin).emit('sentDrives',drives)
         })
@@ -56,6 +93,28 @@ const socketEvents = (io) => {
         //save file
         socket.on('saveFile',(file) => {
             socket.to(client).emit('saveFile',file)
+        })
+
+        //when the scocket disconnects
+        socket.on('disconnect',async () => {
+            if(me === 'client'){
+                console.log(code)
+                const user = await User.findOne({code})
+                
+                if(!user){
+                    return
+                }
+                
+                //make client ofline
+                const pcIndex = user.computers.findIndex(pc => pc.socketId = client)
+
+                if(pcIndex === -1){
+                    return
+                }
+
+                user.computers[pcIndex].socketId = null
+                await user.save()
+            }
         })
     })
 }

@@ -31,14 +31,17 @@
 .explorer-controls{
     position: absolute;
     top: 1.3rem;
-    left: 1.3rem;
     user-select: none;
     
-    button{
+    button,a{
         cursor: pointer;
+        background-color: #F1F1F1;
         height: 5rem;
         width: 5rem;
         border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
 
         span{
             font-size: 3.5rem;
@@ -48,6 +51,15 @@
             margin-right: 2rem;
         }
     }
+
+    //for side modifier
+    &--right{
+        right: 1.3rem;
+    }
+
+    &--left{
+        left: 1.3rem;
+    }
 }
 
 //icon colors
@@ -56,9 +68,9 @@
 }
 
 .color-file{
-    color: rgb(146, 143, 143);
+    color: #928f8f;
 }
 
 .color-image{
-    color: rgb(28, 83, 236);
+    color: #1d54ed;
 }

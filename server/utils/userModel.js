@@ -34,6 +34,10 @@ const userSchema = mongoose.Schema({
         name:{
             type:String,
             required:true,
+        },
+        socketId:{
+            type:String,
+            default:null,
         }
     }],
     tokens:[{

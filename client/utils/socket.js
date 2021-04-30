@@ -1,16 +1,38 @@
 const navigation = require('./navigation')
 const fs = require('fs')
-const socketEvents = (socket) => {
+const os = require('os')
+const path = require('path')
+const axios = require('axios')
+
+const socketEvents = (socket,userData) => {
+    console.log(socket.id)
     //tells server you are client
-    socket.emit('setClient')
+    socket.emit('checkConnection',userData.id,() => {
+        axios.default.post('http://localhost:3000/api/client',{
+            name:userData.name,
+            code:userData.id,
+            socketId:socket.id,
+            _id:userData._id,
+        }).then(res => {
+            const dataFilePath = path.resolve(os.homedir(),'./Documents/connect/data.json')
+            const fileData = JSON.parse(fs.readFileSync(dataFilePath).toString())
+
+            //adds id
+            fileData._id = res.data._id
+
+            fs.writeFileSync(dataFilePath,JSON.stringify(fileData))
+        }).catch(err => {
+            console.log(err.data)
+        })
+    })
     
     socket.on('message',(msg) => {
         console.log(msg)
     })
 
-    socket.on('getDrives',() => {
+    socket.on('getDrives',(adminId) => {
         console.log('Sending drives to server.')
-        socket.emit('sentDrives',navigation.getDrives())
+        socket.emit('sentDrives',navigation.getDrives(),adminId)
     })
 
     socket.on('getDir',(path) => {

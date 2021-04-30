@@ -10,8 +10,11 @@
     <h1>Sokcet Testing</h1>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        let clientId = '608bfc956e6eaa2ae09d5c87'
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgyYTQxZGI4ZDAzZDMzODRjNDM0MjAiLCJpYXQiOjE2MTkxNzQ0Mjl9.k2c-J7DLlSD54U9NOO_LwpJzhxPuVpVspjQCVigd528'
+
         var socket = io();
-        socket.emit('setAdmin')
+        socket.emit('setAdmin',token)
 
         socket.on('message',(msg) => {
             console.log(msg)

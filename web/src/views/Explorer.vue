@@ -13,14 +13,14 @@
       <div v-if="path && !showFile && dir.length > 0 && loaderStage <= 0" style="width:100%;">
         <div @click="routeClick(item)" v-for="item in dir" :key="item.name" class="explorer-item">
           <span v-if="item.isDir" class="material-icons color-folder">folder</span>
-          <span v-else-if="checkFileType(['png','jpg','jpeg'],item.name)" class="material-icons color-image">image</span>
+          <span v-else-if="checkFileType(imgFileType,item.name)" class="material-icons color-image">image</span>
           <span v-else class="material-icons color-file">description</span>
           <p>{{item.name}}</p>
         </div>
       </div>
       <p class="title" v-else-if="dir.length === 0">No files in directory</p>
       <!-- image display -->
-      <img :src="'data:image/png;base64, '+file" v-if="showFile && checkFileType(['png','jpg','jpeg'],path)">
+      <img :src="'data:image/png;base64, '+file" v-if="showFile && checkFileType(imgFileType,path)">
       <!-- file editor -->
       <textarea class="explorer-editor" v-else-if="showFile && !checkFileType(noPreview,path)" v-model="file"></textarea>
       <!-- no preview -->
@@ -28,8 +28,8 @@
       <!-- Progress Loader -->
       <ProgressLoader v-if="loaderStage > 0" :stage="loaderStage"/>
     </div>
-    <!-- controls -->
-    <div class="explorer-controls">
+    <!-- left controls -->
+    <div class="explorer-controls explorer-controls--left">
       <button title="Go Back" @click="goBack" v-if="path">
         <span class="material-icons">west</span>
       </button>
@@ -39,8 +39,17 @@
       <button title="Download" v-if="showFile" @click="downloadFile">
         <span class="material-icons">download</span>
       </button>
-      <button title="Save" v-if="showFile && !checkFileType(['png','jpg','jpeg'],path) && !checkFileType(noPreview,path)" @click="save">
+      <button title="Save" v-if="showFile && !checkFileType(imgFileType,path) && !checkFileType(noPreview,path)" @click="save">
         <span class="material-icons">save</span>
+      </button>
+    </div>
+    <!-- right controls -->
+    <div class="explorer-controls explorer-controls--right">
+      <router-link to="/account" title="Account">
+        <span class="material-icons">person</span>
+      </router-link>
+      <button title="Settings">
+        <span class="material-icons">settings</span>
       </button>
     </div>
   </div>
@@ -63,16 +72,17 @@ export default {
       showFile:false,
       slices:[],
       loaderStage:0,
+      imgFileType:['png','jpg','jpeg'],
       noPreview:['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
-      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat']
+      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte']
     }
   },
   created(){
     this.socketEvents()
-    this.socket.emit('setAdmin')
+    this.socket.emit('setAdmin',this.user._id)
     this.socket.emit('getDrives')
 
-    //sets up short cuts
+    //sets up keyboard shortcuts
     window.addEventListener('keydown',(e) => {
       const element = e.target.tagName.toLowerCase()
       if(element === 'input' || element === 'textarea'){
@@ -92,6 +102,9 @@ export default {
       }
     })
   },
+  beforeDestroy(){
+    this.socket.disconnect()
+  },
   methods:{
       save(){
         this.socket.emit('saveFile',{
@@ -104,7 +117,7 @@ export default {
         const fileName = this.path.replace(/^.*[\\/]/, '')
         let fileData = null
 
-        if(this.checkFileType(['png','jpg','jpeg'],fileName)){
+        if(this.checkFileType(this.imgFileType,fileName)){
           fileData = this.file
         }else{
           fileData = btoa(this.file)
@@ -207,6 +220,11 @@ export default {
         this.slices = []
       },
       checkFileType(extensions = [],fileName){
+          //check for no file type
+          if(extensions[0] !== 'png' && !/\.(.*)/.test(fileName)){
+            return true
+          }
+
           let startPartten = '.('
           let endPartten = ')$'
 
@@ -236,5 +254,10 @@ export default {
         setTimeout(() => {ref.classList.remove('spin')},200)
       }
   },
+  computed:{
+    user(){
+      return this.$store.state.user
+    }
+  }
 }
 </script>

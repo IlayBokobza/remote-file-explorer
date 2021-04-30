@@ -28,7 +28,8 @@ require('./utils/db')
 
 //sets socket events and user route
 require('./utils/socket')(io)
-app.use(require('./utils/userRoutes'))
+app.use(require('./routes/user'))
+app.use(require('./routes/client'))
 
 //port for prod and dev
 const port = process.env.PORT || 3000

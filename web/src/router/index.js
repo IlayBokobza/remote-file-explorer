@@ -4,6 +4,8 @@ import store from '../store/index'
 import Explorer from "../views/Explorer.vue";
 import Signup from '../views/Signup.vue';
 import Login from '../views/Login.vue';
+import Account from '../views/Account.vue';
+import Homepage from '../views/Homepage.vue';
 
 Vue.use(VueRouter)
 
@@ -12,7 +14,7 @@ const onlyLoggedIn = (to,from,next) => {
   if(store.state.user){
     next()
   }else{
-    next({name:'login'})
+    next({name:'homepage'})
   }
 }
 
@@ -26,6 +28,12 @@ const onlyNotLoggedIn = (to,from,next) => {
 
 //routes
 const routes = [
+  {
+    path:'/',
+    name:'homepage',
+    component:Homepage,
+    beforeEnter:onlyNotLoggedIn
+  },
   {
     path: '/explorer',
     name: 'explorer',
@@ -43,6 +51,12 @@ const routes = [
     name:'login',
     component:Login,
     beforeEnter:onlyNotLoggedIn,
+  },
+  {
+    path:'/account',
+    name:'account',
+    component:Account,
+    beforeEnter:onlyLoggedIn,
   },
 ]
 

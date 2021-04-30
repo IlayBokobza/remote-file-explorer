@@ -1,11 +1,11 @@
 const express = require('express')
 const router = new express.Router()
 const bcrypt = require('bcryptjs')
-const User = require('./userModel')
+const User = require('../utils/userModel')
 const uniqid = require('uniqid')
 
 //auth middleware
-const auth = require('./auth')
+const auth = require('../utils/auth')
 
 //create new user
 router.post('/api/users/signup',async (req,res) => {
