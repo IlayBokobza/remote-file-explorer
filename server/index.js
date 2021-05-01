@@ -40,6 +40,13 @@ app.get('/api/socket-testing',(req,res) => {
     res.sendFile(__dirname+'/utils/scoketTesting.html')
 })
 
+//serves app
+const prodPath = `${__dirname}/dist`
+app.use(express.static(prodPath))
+app.get(/.*/,(req,res) => {
+    res.sendFile(`${prodPath}/index.html`)
+})
+
 //listens for port (3000 for dev)
 server.listen(port,() => {
     console.log(`Runing on port ${port}`)
