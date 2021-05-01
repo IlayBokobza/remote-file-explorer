@@ -16,21 +16,30 @@ const socketEvents = (io) => {
             client = socket.id
             me = 'client'
             code = userCode
+
+            if(!userCode){
+                return cb({error:'No code'})
+            }
+
             cb()
         })
 
         //sets admin id
         socket.on('setAdmin',async (token,cb) => {
-            const decoded = jwt.verify(token,'secretTokenKey')
-            user = await User.findOne({ _id: decoded._id, 'tokens.token':token })
-
-            if(!user){
-                return cb({error:'No user Found'})
+            try {
+                const decoded = jwt.verify(token,'secretTokenKey')
+                user = await User.findOne({ _id: decoded._id, 'tokens.token':token })
+    
+                if(!user){
+                    return cb({error:'No user Found'})
+                }
+                
+                admin = socket.id
+                me = 'admin'
+                console.log(`Successfully added an admin`)
+            } catch (error) {
+                console.log(error)
             }
-            
-            admin = socket.id
-            me = 'admin'
-            console.log(`Successfully added an admin`)
         })
 
         //sets client
@@ -53,7 +62,6 @@ const socketEvents = (io) => {
 
         //gets drive
         socket.on('getDrives',() => {
-            console.log(client)
             socket.to(client).emit('getDrives',admin)
         })
 
@@ -98,22 +106,28 @@ const socketEvents = (io) => {
         //when the scocket disconnects
         socket.on('disconnect',async () => {
             if(me === 'client'){
-                console.log(code)
-                const user = await User.findOne({code})
-                
-                if(!user){
-                    return
+                try {
+                    console.log('here')
+                    const user = await User.findOne({code})
+                    
+                    if(!user){
+                        return
+                    }
+                    
+                    //make client ofline
+                    const pcIndex = user.computers.findIndex(pc => pc.socketId = client)
+    
+                    if(pcIndex === -1){
+                        return
+                    }
+    
+                    user.computers[pcIndex].socketId = null
+                    await user.save()
+    
+                    console.log('Disconnected User')
+                } catch (error) {
+                    console.log(error)
                 }
-                
-                //make client ofline
-                const pcIndex = user.computers.findIndex(pc => pc.socketId = client)
-
-                if(pcIndex === -1){
-                    return
-                }
-
-                user.computers[pcIndex].socketId = null
-                await user.save()
             }
         })
     })

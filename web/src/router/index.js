@@ -6,6 +6,7 @@ import Signup from '../views/Signup.vue';
 import Login from '../views/Login.vue';
 import Account from '../views/Account.vue';
 import Homepage from '../views/Homepage.vue';
+import PcSelector from '../views/PcSelector.vue'
 
 Vue.use(VueRouter)
 
@@ -22,7 +23,7 @@ const onlyNotLoggedIn = (to,from,next) => {
   if(!store.state.user){
     next()
   }else{
-    next({name:'explorer'})
+    next({name:'pcSelector'})
   }
 }
 
@@ -38,6 +39,12 @@ const routes = [
     path: '/explorer',
     name: 'explorer',
     component: Explorer,
+    beforeEnter:onlyLoggedIn,
+  },
+  {
+    path: '/pc-selector',
+    name: 'pcSelector',
+    component: PcSelector,
     beforeEnter:onlyLoggedIn,
   },
   {

@@ -5,9 +5,14 @@ const path = require('path')
 const axios = require('axios')
 
 const socketEvents = (socket,userData) => {
-    console.log(socket.id)
     //tells server you are client
-    socket.emit('checkConnection',userData.id,() => {
+    socket.emit('checkConnection',userData.id,(err) => {
+        //checks for error
+        if(err?.error){
+            console.log(error)
+            process.exit()
+        }
+
         axios.default.post('http://localhost:3000/api/client',{
             name:userData.name,
             code:userData.id,
@@ -21,13 +26,11 @@ const socketEvents = (socket,userData) => {
             fileData._id = res.data._id
 
             fs.writeFileSync(dataFilePath,JSON.stringify(fileData))
+            console.log('Connected to server')
         }).catch(err => {
-            console.log(err.data)
+            console.log(err.response.data.error)
+            process.exit()
         })
-    })
-    
-    socket.on('message',(msg) => {
-        console.log(msg)
     })
 
     socket.on('getDrives',(adminId) => {

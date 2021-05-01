@@ -28,30 +28,30 @@
       <!-- Progress Loader -->
       <ProgressLoader v-if="loaderStage > 0" :stage="loaderStage"/>
     </div>
-    <!-- left controls -->
-    <div class="explorer-controls explorer-controls--left">
-      <button title="Go Back" @click="goBack" v-if="path">
-        <span class="material-icons">west</span>
-      </button>
-      <button title="Refresh" id="explorer-refresh-btn" @click="refresh">
-        <span class="material-icons">autorenew</span>
-      </button>
-      <button title="Download" v-if="showFile" @click="downloadFile">
-        <span class="material-icons">download</span>
-      </button>
-      <button title="Save" v-if="showFile && !checkFileType(imgFileType,path) && !checkFileType(noPreview,path)" @click="save">
-        <span class="material-icons">save</span>
-      </button>
-    </div>
-    <!-- right controls -->
-    <div class="explorer-controls explorer-controls--right">
-      <router-link to="/account" title="Account">
-        <span class="material-icons">person</span>
-      </router-link>
-      <button title="Settings">
-        <span class="material-icons">settings</span>
-      </button>
-    </div>
+      <!-- left controls -->
+      <div class="explorer-controls explorer-controls--left">
+        <button title="Go Back" @click="goBack" v-if="path">
+          <span class="material-icons">west</span>
+        </button>
+        <button title="Refresh" id="explorer-refresh-btn" @click="refresh">
+          <span class="material-icons">autorenew</span>
+        </button>
+        <button title="Download" v-if="showFile" @click="downloadFile">
+          <span class="material-icons">download</span>
+        </button>
+        <button title="Save" v-if="showFile && !checkFileType(imgFileType,path) && !checkFileType(noPreview,path)" @click="save">
+          <span class="material-icons">save</span>
+        </button>
+      </div>
+      <!-- right controls -->
+      <div class="explorer-controls explorer-controls--right">
+        <router-link to="/account" title="Account">
+          <span class="material-icons">person</span>
+        </router-link>
+        <button title="Settings">
+          <span class="material-icons">settings</span>
+        </button>
+      </div>
   </div>
 </template>
 
@@ -60,7 +60,7 @@ import io from 'socket.io-client'
 import path from 'path'
 import ProgressLoader from '../components/ProgressLoader.vue'
 export default {
-  components: { ProgressLoader },
+  components: { ProgressLoader},
   name: 'explorer',
   data(){
     return{
@@ -79,7 +79,8 @@ export default {
   },
   created(){
     this.socketEvents()
-    this.socket.emit('setAdmin',this.user._id)
+    this.socket.emit('setAdmin',localStorage.getItem('token'))
+    this.socket.emit('selectClient',this.$route.query.pc,(err) => console.warn(err))
     this.socket.emit('getDrives')
 
     //sets up keyboard shortcuts

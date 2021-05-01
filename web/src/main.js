@@ -26,6 +26,7 @@ if(token){
     loadVue()
   }).catch(err => {
     console.warn(err.response)
+    localStorage.removeItem('token')
     loadVue()
   })
 }else{

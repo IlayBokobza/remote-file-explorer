@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const os = require('os')
+// const os = require('os')
 // require('dotenv').config()
 
 let uri = process.env.MONGO_SRV

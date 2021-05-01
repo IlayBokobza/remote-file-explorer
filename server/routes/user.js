@@ -119,4 +119,13 @@ router.delete('/api/users/',auth,async (req,res) => {
 })
 
 
+//get computers
+router.get('/api/users/pc',auth,(req,res) => {
+    try{
+        res.send(req.user.computers)
+    }catch(error){
+        res.status(500).send({error:''+error})
+    }
+})
+
 module.exports = router

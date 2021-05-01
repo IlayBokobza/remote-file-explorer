@@ -15,7 +15,7 @@ router.post('/api/client',async (req,res) => {
             const computerIndex = user.computers.findIndex(pc => `${pc._id}` === req.body._id)
 
             if(computerIndex === -1){
-                return res.status(404).send({error:'No computer with this id is connected to your account'})
+                return res.status(404).send({error:'No computer with this id is connected to your account.\n Try entering the code again.'})
             }
 
             user.computers[computerIndex].socketId = req.body.socketId
