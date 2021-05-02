@@ -2,6 +2,7 @@ const readline = require('readline');
 const os = require('os')
 const fs = require('fs')
 const path = require('path')
+const {turnOnDevMode} = require('./serverIp')
 
 //setup readline
 const rl = readline.createInterface({
@@ -24,8 +25,31 @@ const askToUseExistingData = () => {
     })
 }
 
+const askForDevMode = () => {
+    return new Promise(async (resolve,reject) => {
+        rl.question('Hello Ilay! Do you want to use dev mode? [y/n]\n',async (answer) => {
+            if(answer === 'y' || answer === 'yes' || answer === ''){
+                console.log('Ok using dev mode!')
+                turnOnDevMode()
+                resolve()
+            }else if(answer === 'n' || answer === 'no'){
+                console.log('Using prod.')
+                resolve()
+            }else{
+                const reAnswer = await askForDevMode()
+                resolve(reAnswer)
+            }
+        })
+    })
+}
+
 const getData = async () => {
     return new Promise(async (resolve,reject) => {
+        //checks the programs is running on my pc if so ask for dev mode
+        if(os.hostname() === 'IlayBIgPc'){
+            await askForDevMode()
+        }
+
         const dataFolderPath = path.resolve(os.homedir(),'./Documents/connect')
         const dataFilePath = path.resolve(dataFolderPath,'./data.json')
 

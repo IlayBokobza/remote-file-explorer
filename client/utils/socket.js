@@ -3,6 +3,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const axios = require('axios')
+const {getIp} = require('./serverIp')
 
 const socketEvents = (socket,userData) => {
     //tells server you are client
@@ -13,7 +14,15 @@ const socketEvents = (socket,userData) => {
             process.exit()
         }
 
-        axios.default.post('http://localhost:3000/api/client',{
+        let url = null
+        let selectedIp = getIp()
+        if(selectedIp === 'connect.ilaydev.com'){
+            url = 'https://connect.ilaydev.com'
+        }else{
+            url = `http://${selectedIp}`
+        }
+
+        axios.post(`${url}/api/client`,{
             name:userData.name,
             code:userData.id,
             socketId:socket.id,

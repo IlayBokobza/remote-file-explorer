@@ -52,6 +52,9 @@
           <span class="material-icons">settings</span>
         </button>
       </div>
+      <!-- popup -->
+      <Popup title="Error" :text="popupText+' Please Go Back'" removeCancel="true" acceptText="Go Back"
+        v-if="showPopup" @closed="showPopup = false;$router.push({path:'pc-selector'})" />
   </div>
 </template>
 
@@ -59,8 +62,9 @@
 import io from 'socket.io-client'
 import path from 'path'
 import ProgressLoader from '../components/ProgressLoader.vue'
+import Popup from '../components/Popup.vue'
 export default {
-  components: { ProgressLoader},
+  components: { ProgressLoader, Popup},
   name: 'explorer',
   data(){
     return{
@@ -74,13 +78,19 @@ export default {
       loaderStage:0,
       imgFileType:['png','jpg','jpeg'],
       noPreview:['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
-      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte']
+      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte','ico'],
+      //popup
+      showPopup:false,
+      popupText:null
     }
   },
   created(){
     this.socketEvents()
     this.socket.emit('setAdmin',localStorage.getItem('token'))
-    this.socket.emit('selectClient',this.$route.query.pc,(err) => console.warn(err))
+    this.socket.emit('selectClient',this.$route.query.pc,({error}) => {
+      this.popupText = error
+      this.showPopup = true
+    })
     this.socket.emit('getDrives')
 
     //sets up keyboard shortcuts
@@ -106,6 +116,14 @@ export default {
   beforeDestroy(){
     this.socket.disconnect()
   },
+  watch:{
+    '$route':function(e){
+      const urlPath = e.query.path
+      if(urlPath !== this.path){
+        this.setPath(urlPath)
+      }
+    }
+  },
   methods:{
       save(){
         this.socket.emit('saveFile',{
@@ -121,6 +139,7 @@ export default {
         if(this.checkFileType(this.imgFileType,fileName)){
           fileData = this.file
         }else{
+          console.log(this.file)
           fileData = btoa(this.file)
         }
 
@@ -131,7 +150,8 @@ export default {
       },
       setPath(path){
         this.path = path
-        this.socket.emit('getDir',path) 
+        this.socket.emit('getDir',path)
+        this.$router.push({path:'/explorer',query:{pc:this.$route.query.pc,path}}).catch(err => {err})
       },
       goBack(){
         let newPath = path.resolve(`${this.path}/..`)
@@ -152,7 +172,7 @@ export default {
       routeClick(item){
         const itemPath = `${this.path}/${item.name}`
 
-        if(item.isDir){
+        if(item.isDir || !this.checkFileType(this.noPreview,itemPath)){
           this.setPath(itemPath)
         }else{
           this.socket.emit('getFile',itemPath)
@@ -206,6 +226,11 @@ export default {
             if(this.slices.length >= 5){
               this.combineSlices()
             }
+        })
+
+        this.socket.on('clientDisconnectd',() => {
+          this.popupText = 'Your selected client has disconnectd. Please go back'
+          this.showPopup = true
         })
       },
       combineSlices(){

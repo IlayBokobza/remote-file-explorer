@@ -12,15 +12,15 @@ const server = http.createServer(app)
 app.use(express.json())
 
 //config cors
-const allowedUrls = ['localhost:3000','localhost:8080','connectapp.ilaydev.com']
+const allowedUrls = ['localhost:3000','localhost:8080','connect.ilaydev.com']
 app.use(cors({
-    origin:allowedUrls
+    origin:'*'
 }))
 
 //start socket
 const io = socketIo(server,{
     cors:{
-        origin:allowedUrls
+        origin:'*'
     }
 })
 

@@ -1,7 +1,8 @@
 .DS_Store
 node_modules
 dist
-
+ip.txt
+deploy.bash
 
 # local env files
 .env.local

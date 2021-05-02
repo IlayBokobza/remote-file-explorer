@@ -44,6 +44,10 @@ const socketEvents = (io) => {
 
         //sets client
         socket.on('selectClient',(clientDbId,cb) => {
+            if(!user){
+                return cb({error:'Error please try again'})
+            }
+
             const copmuterIndex = user.computers.findIndex(pc => `${pc._id}` === clientDbId)
 
             if(copmuterIndex === -1){
@@ -123,6 +127,10 @@ const socketEvents = (io) => {
     
                     user.computers[pcIndex].socketId = null
                     await user.save()
+
+                    if(admin){
+                        socket.to(admin).emit('clientDisconnectd')
+                    }
     
                     console.log('Disconnected User')
                 } catch (error) {
