@@ -172,7 +172,7 @@ export default {
       routeClick(item){
         const itemPath = `${this.path}/${item.name}`
 
-        if(item.isDir || !this.checkFileType(this.noPreview,itemPath)){
+        if(item.isDir || !this.checkFileType(this.imgFileType,itemPath) && !this.checkFileType(this.noPreview,itemPath)){
           this.setPath(itemPath)
         }else{
           this.socket.emit('getFile',itemPath)
