@@ -2,6 +2,8 @@
   <div>
     <!-- container -->
     <div class="drive-select container">
+      <!-- loader -->
+      <Loader v-if="showLoader"/>
       <!-- drives -->
       <div v-if="!path" style="width:100%;">
         <div @click="setPath(`${drive}/`)" v-for="drive in drives" :key="drive" class="explorer-item">
@@ -18,7 +20,7 @@
           <p>{{item.name}}</p>
         </div>
       </div>
-      <p class="title" v-else-if="dir.length === 0">No files in directory</p>
+      <p class="title" v-else-if="dir.length === 0 && !showLoader">No files in directory</p>
       <!-- image display -->
       <img :src="'data:image/png;base64, '+file" v-if="showFile && checkFileType(imgFileType,path)">
       <!-- file editor -->
@@ -63,8 +65,9 @@ import io from 'socket.io-client'
 import path from 'path'
 import ProgressLoader from '../components/ProgressLoader.vue'
 import Popup from '../components/Popup.vue'
+import Loader from '../components/Loader.vue'
 export default {
-  components: { ProgressLoader, Popup},
+  components: { ProgressLoader, Popup, Loader},
   name: 'explorer',
   data(){
     return{
@@ -73,12 +76,15 @@ export default {
       drives:[],
       path:'',
       file:'',
+      fileName:'',
       showFile:false,
       slices:[],
+      showLoader:true,
       loaderStage:0,
       imgFileType:['png','jpg','jpeg'],
       noPreview:['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
-      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte','ico'],
+      'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf',
+      'tte','ico','vmdk','vmsd','vmx','vmxf','nvram','wt','bson','mdmp'],
       //popup
       showPopup:false,
       popupText:null
@@ -86,12 +92,24 @@ export default {
   },
   created(){
     this.socketEvents()
-    this.socket.emit('setAdmin',localStorage.getItem('token'))
-    this.socket.emit('selectClient',this.$route.query.pc,({error}) => {
-      this.popupText = error
-      this.showPopup = true
+    this.socket.emit('setAdmin',localStorage.getItem('token'),(error) => {
+      if(error){
+        console.warn(error)
+        this.popupText = error.error
+        this.showPopup = true
+        return
+      }
+
+      this.socket.emit('selectClient',this.$route.query.pc,(error) => {
+        if(error){
+          console.warn(error)
+          this.popupText = error.error
+          this.showPopup = true
+        }
+
+        this.socket.emit('getDrives')
+      })
     })
-    this.socket.emit('getDrives')
 
     //sets up keyboard shortcuts
     window.addEventListener('keydown',(e) => {
@@ -132,26 +150,33 @@ export default {
         })
         this.goBack()
       },
+      downloadFileDataToUserPc({fileName,fileData}){
+        const simDownloadBtn = document.getElementById('sim-download-btn')
+        simDownloadBtn.setAttribute('href',`data:application/octet-stream;base64, ${fileData}`)
+        simDownloadBtn.setAttribute('download',fileName)
+        simDownloadBtn.click()
+      },
       downloadFile(){
         const fileName = this.path.replace(/^.*[\\/]/, '')
         let fileData = null
 
         if(this.checkFileType(this.imgFileType,fileName)){
           fileData = this.file
-        }else{
-          console.log(this.file)
+          this.downloadFileDataToUserPc({fileName,fileData})
+        }else if(this.file){
           fileData = btoa(this.file)
+          this.downloadFileDataToUserPc({fileName,fileData})
+        }else{
+          //ask for file
+          this.fileName = fileName
+          this.socket.emit('sendBigFile',this.path)
         }
-
-        const simDownloadBtn = document.getElementById('sim-download-btn')
-        simDownloadBtn.setAttribute('href',`data:application/octet-stream;base64, ${fileData}`)
-        simDownloadBtn.setAttribute('download',fileName)
-        simDownloadBtn.click()
       },
       setPath(path){
         this.path = path
         this.socket.emit('getDir',path)
         this.$router.push({path:'/explorer',query:{pc:this.$route.query.pc,path}}).catch(err => {err})
+        this.showLoader = true
       },
       goBack(){
         let newPath = path.resolve(`${this.path}/..`)
@@ -172,8 +197,11 @@ export default {
       routeClick(item){
         const itemPath = `${this.path}/${item.name}`
 
-        if(item.isDir || !this.checkFileType(this.imgFileType,itemPath) && !this.checkFileType(this.noPreview,itemPath)){
+        if(item.isDir){
           this.setPath(itemPath)
+        }else if(this.checkFileType([...this.noPreview],itemPath)){
+          this.path = itemPath
+          this.showFile = true
         }else{
           this.socket.emit('getFile',itemPath)
         }
@@ -207,16 +235,18 @@ export default {
         this.socket.on('sentDrives',(drives) => {
             this.drives = drives
             this.dir = drives
+            this.showLoader = false
         })
 
         this.socket.on('sentDir',(data) => {
             this.dir = this.sortDir(data)
-            // this.dir = data
+           this.showLoader = false
         })
 
         this.socket.on('sentFile',(file) => {
             this.file = file
             this.showFile = true
+            this.showLoader = false
         })
 
         this.socket.on('sentSlice',(slice) => {
@@ -228,9 +258,26 @@ export default {
             }
         })
 
+        this.socket.on('sentFileSlice',(slice) => {
+          this.slices.push(slice)
+
+          if(this.slices.length >= 5){
+            this.file = ''
+            this.slices.forEach(slice => {
+              this.file += slice
+            })
+
+            this.downloadFileDataToUserPc({fileName:this.fileName,fileData:this.file})
+            this.slices = []
+            this.file = null
+            this.fileName = ''
+          }
+        })
+
         this.socket.on('clientDisconnectd',() => {
           this.popupText = 'Your selected client has disconnectd. Please go back'
           this.showPopup = true
+          this.$store.commit('setPcOffline',this.$route.query.pc)
         })
       },
       combineSlices(){

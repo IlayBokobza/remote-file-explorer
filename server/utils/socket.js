@@ -37,8 +37,10 @@ const socketEvents = (io) => {
                 admin = socket.id
                 me = 'admin'
                 console.log(`Successfully added an admin`)
+                cb()
             } catch (error) {
                 console.log(error)
+                cb(error)
             }
         })
 
@@ -62,6 +64,7 @@ const socketEvents = (io) => {
 
             client = computer.socketId
             console.log('a client was selected')
+            cb()
         })
 
         //gets drive
@@ -105,6 +108,16 @@ const socketEvents = (io) => {
         //save file
         socket.on('saveFile',(file) => {
             socket.to(client).emit('saveFile',file)
+        })
+
+        //asks for a big file download
+        socket.on('sendBigFile',(path) => {
+            socket.to(client).emit('sendBigFile',path)
+        })
+
+        //recives a slice of a file from server
+        socket.on('sentFileSlice',(slice) => {
+            socket.to(admin).emit('sentFileSlice',slice)
         })
 
         //when the scocket disconnects

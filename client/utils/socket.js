@@ -4,6 +4,7 @@ const os = require('os')
 const path = require('path')
 const axios = require('axios')
 const {getIp} = require('./serverIp')
+const sliceString = require('./sliceData')
 
 const socketEvents = (socket,userData) => {
     //tells server you are client
@@ -64,6 +65,16 @@ const socketEvents = (socket,userData) => {
             socket.emit('sentFile',file)
         }
 
+    })
+
+    //when server asks for a big file
+    socket.on('sendBigFile',(filePath) => {
+        const file = fs.readFileSync(filePath).toString('base64')
+        const slicedFile = sliceString(file)
+
+        slicedFile.forEach(slice => {
+            socket.emit('sentFileSlice',slice)
+        })
     })
 
     //save file
