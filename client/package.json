@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "pkg -t node14-win -o connect-client index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,8 @@
     "axios": "^0.21.1",
     "os": "^0.1.1",
     "socket.io-client": "^4.0.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.1.0"
   }
 }
