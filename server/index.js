@@ -12,7 +12,7 @@ const server = http.createServer(app)
 app.use(express.json())
 
 //config cors
-const allowedUrls = ['localhost:3000','localhost:8080','connect.ilaydev.com']
+// const allowedUrls = ['localhost:3000','localhost:8080','connect.ilaydev.com']
 app.use(cors({
     origin:'*'
 }))

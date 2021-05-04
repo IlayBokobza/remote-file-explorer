@@ -5,14 +5,14 @@
       <!-- loader -->
       <Loader v-if="showLoader"/>
       <!-- drives -->
-      <div v-if="!path" style="width:100%;">
+      <div v-else-if="!path" style="width:100%;">
         <div @click="setPath(`${drive}/`)" v-for="drive in drives" :key="drive" class="explorer-item">
           <span class="material-icons">storage</span>
           <p>{{drive}}</p>
         </div>
       </div>
       <!-- dir -->
-      <div v-if="path && !showFile && dir.length > 0 && loaderStage <= 0" style="width:100%;">
+      <div v-else-if="path && !showFile && dir.length > 0 && loaderStage <= 0" style="width:100%;">
         <div @click="routeClick(item)" v-for="item in dir" :key="item.name" class="explorer-item">
           <span v-if="item.isDir" class="material-icons color-folder">folder</span>
           <span v-else-if="checkFileType(imgFileType,item.name)" class="material-icons color-image">image</span>
@@ -28,7 +28,7 @@
       <!-- no preview -->
       <p class="title" v-else-if="showFile">Cannot display this file type</p>
       <!-- Progress Loader -->
-      <ProgressLoader v-if="loaderStage > 0" :stage="loaderStage"/>
+      <ProgressLoader v-else-if="loaderStage > 0" :stage="loaderStage"/>
     </div>
       <!-- left controls -->
       <div class="explorer-controls explorer-controls--left">
@@ -240,7 +240,7 @@ export default {
 
         this.socket.on('sentDir',(data) => {
             this.dir = this.sortDir(data)
-           this.showLoader = false
+            this.showLoader = false
         })
 
         this.socket.on('sentFile',(file) => {
