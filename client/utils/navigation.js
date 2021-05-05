@@ -2,7 +2,7 @@ const fs = require('fs')
 const sliceString = require('./sliceData')
 
 const getDrives = () => {
-    const letters = JSON.parse(fs.readFileSync(__dirname+'/lettter.json').toString())
+    const letters = require('./lettter')
     const doesExist = []
     
     //checks all letters and if drive exist add to array

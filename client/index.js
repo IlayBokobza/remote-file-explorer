@@ -4,6 +4,13 @@ const getUserData = require('./utils/getUserData')
 
 //get data
 getUserData().then((userData) => {
+
+    //TEMP to keep client open
+    const rl = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    })
+
     //sets domain to ip so can connect
     let ip = null
     if(getIp() === 'connect.ilaydev.com'){
