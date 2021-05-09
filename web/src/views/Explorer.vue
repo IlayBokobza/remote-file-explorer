@@ -26,9 +26,9 @@
       <!-- file editor -->
       <textarea class="explorer-editor" v-else-if="showFile && !checkFileType(noPreview,path)" v-model="file"></textarea>
       <!-- no preview -->
-      <p class="title" v-else-if="showFile">Cannot display this file type</p>
+      <p class="title" v-else-if="showFile && loaderStage <= 0">Cannot display this file type</p>
       <!-- Progress Loader -->
-      <ProgressLoader v-else-if="loaderStage > 0" :stage="loaderStage"/>
+      <ProgressLoader v-else-if="loaderStage > 0" :stage="roundedLoaderStage"/>
     </div>
       <!-- left controls -->
       <div class="explorer-controls explorer-controls--left">
@@ -78,7 +78,9 @@ export default {
       file:'',
       fileName:'',
       showFile:false,
+      askedToDownloadFile:false,
       slices:[],
+      maxSlices:null,
       showLoader:true,
       loaderStage:0,
       imgFileType:['png','jpg','jpeg'],
@@ -169,7 +171,8 @@ export default {
         }else{
           //ask for file
           this.fileName = fileName
-          this.socket.emit('sendBigFile',this.path)
+          this.askedToDownloadFile = true
+          this.socket.emit('getFile',this.path)
         }
       },
       setPath(path){
@@ -250,10 +253,15 @@ export default {
         })
 
         this.socket.on('sentSlice',(slice) => {
-            this.slices.push(slice)
-            this.loaderStage += 20
+            if(!this.maxSlices){
+              this.maxSlices = parseInt(/^{([1-9])*}/.exec(slice)[0].replace(/{/,'').replace(/}/,''))
+              slice = slice.replace(/^{([1-9])*}/,'')
+            }
 
-            if(this.slices.length >= 5){
+            this.slices.push(slice)
+            this.loaderStage += 100/this.maxSlices
+            
+            if(this.slices.length >= this.maxSlices){
               this.combineSlices()
             }
         })
@@ -287,10 +295,22 @@ export default {
           output += slice
         })
 
-        this.file = output
+        if(this.askedToDownloadFile){
+            this.downloadFileDataToUserPc({
+              fileName:this.fileName,
+              fileData:output
+            })
+
+            this.askedToDownloadFile = false
+        }else{
+          //shows file to user
+          this.file = output
+        }
+
         this.showFile = true
         this.loaderStage = 0
         this.slices = []
+        this.maxSlices = null
       },
       checkFileType(extensions = [],fileName){
           //check for no file type
@@ -330,6 +350,9 @@ export default {
   computed:{
     user(){
       return this.$store.state.user
+    },
+    roundedLoaderStage(){
+      return Math.round(this.loaderStage)
     }
   }
 }

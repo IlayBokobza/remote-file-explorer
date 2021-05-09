@@ -57,13 +57,9 @@ const socketEvents = (socket,userData) => {
         console.log(`Sending file "${path}" to server.`)
         const file = navigation.getFile(path)
         
-        if(file?.sliced){
-            file.data.forEach(slice => {
-                socket.emit('sentSlice',slice)
-            })
-        }else{
-            socket.emit('sentFile',file)
-        }
+        file.forEach(slice => {
+            socket.emit('sentSlice',slice)
+        })
 
     })
 

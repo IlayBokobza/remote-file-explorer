@@ -1,6 +1,10 @@
 const fs = require('fs')
 const sliceString = require('./sliceData')
 
+const noPreview = ['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
+'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte','ico','vmdk','vmsd',
+'vmx','vmxf','nvram','wt','bson','mdmp']
+
 const getDrives = () => {
     const letters = require('./lettter')
     const doesExist = []
@@ -54,9 +58,11 @@ const getFile = (path) => {
     }
     
     let file = null
+    let fileSize = null
 
     try {
         file = fs.readFileSync(path)
+        fileSize = fs.statSync(path).size
     } catch (error) {
         console.log(error.code)
         return JSON.stringify(error)
@@ -64,15 +70,13 @@ const getFile = (path) => {
     
     const fileName = path.replace(/^.*[\\\/]/, '')
 
-    if(checkFileType(['png','jpeg','jpg'],fileName)){
-        const fileData = file.toString('base64')
-        return {
-            sliced:true,
-            data:sliceString(fileData)
-        }
+    if(checkFileType([...noPreview,'png','jpeg','jpg'],fileName)){
+        file = file.toString('base64')
+    }else{
+        file = file.toString()
     }
 
-    return file.toString()
+    return sliceString(file,fileSize)
 }
 
 const checkFileType = (extensions = [],fileName) => {
