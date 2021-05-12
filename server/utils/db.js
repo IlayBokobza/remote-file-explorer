@@ -1,16 +1,6 @@
 const mongoose = require('mongoose')
-// const os = require('os')
-// require('dotenv').config()
+const uri = process.env.MONGO_SRV
 
-let uri = process.env.MONGO_SRV
-
-//switch between pord and dev
-// if(os.hostname() == 'IlayBIgPc'){
-//     uri = ''
-// }else{
-//    uri = process.env.MONGODBKEY
-//
-// }
 
 //connects to db
 mongoose.connect(uri,{

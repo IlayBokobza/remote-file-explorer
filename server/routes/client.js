@@ -7,7 +7,7 @@ router.post('/api/client',async (req,res) => {
         const user = await User.findOne({code:req.body.code})
 
         if(!user){
-            res.status(404).send({error:'No user with that code was found.'})
+            return res.status(404).send({error:'No user with that code was found.'})
         }
 
         //checks if computer is already in db
@@ -29,7 +29,7 @@ router.post('/api/client',async (req,res) => {
         await user.save()
         res.status(201).send({_id:user.computers[user.computers.length-1]._id})
     }catch(error){
-        res.status(500).send({error:`${error}`})
+        return res.status(500).send({error:`${error}`})
     }
 })
 

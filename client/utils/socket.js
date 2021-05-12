@@ -15,13 +15,7 @@ const socketEvents = (socket,userData) => {
             process.exit()
         }
 
-        let url = null
-        let selectedIp = getIp()
-        if(selectedIp === 'connect.ilaydev.com'){
-            url = 'https://connect.ilaydev.com'
-        }else{
-            url = `http://${selectedIp}`
-        }
+        let url = getIp()
 
         axios.post(`${url}/api/client`,{
             name:userData.name,
@@ -63,20 +57,20 @@ const socketEvents = (socket,userData) => {
 
     })
 
-    //when server asks for a big file
-    socket.on('sendBigFile',(filePath) => {
-        const file = fs.readFileSync(filePath).toString('base64')
-        const slicedFile = sliceString(file)
-
-        slicedFile.forEach(slice => {
-            socket.emit('sentFileSlice',slice)
-        })
-    })
-
     //save file
     socket.on('saveFile',(file) => {
         fs.writeFileSync(file.path,`${file.data}`)
         console.log(`Saving File ${file.path}`)
+    })
+
+    //zipes folder
+    socket.on('zipFolder',async (path) => {
+        const zip = await navigation.getZipedFolder(path)
+        const slicedData = sliceString(zip.data,zip.size)
+
+        slicedData.forEach(slice => {
+            socket.emit('sentSlice',slice)
+        })
     })
 }
 

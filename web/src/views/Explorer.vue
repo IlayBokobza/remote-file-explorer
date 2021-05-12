@@ -4,6 +4,8 @@
     <div class="drive-select container">
       <!-- loader -->
       <Loader v-if="showLoader"/>
+      <!-- Progress Loader -->
+      <ProgressLoader v-else-if="loaderStage > 0" :stage="roundedLoaderStage"/>
       <!-- drives -->
       <div v-else-if="!path" style="width:100%;">
         <div @click="setPath(`${drive}/`)" v-for="drive in drives" :key="drive" class="explorer-item">
@@ -27,8 +29,6 @@
       <textarea class="explorer-editor" v-else-if="showFile && !checkFileType(noPreview,path)" v-model="file"></textarea>
       <!-- no preview -->
       <p class="title" v-else-if="showFile && loaderStage <= 0">Cannot display this file type</p>
-      <!-- Progress Loader -->
-      <ProgressLoader v-else-if="loaderStage > 0" :stage="roundedLoaderStage"/>
     </div>
       <!-- left controls -->
       <div class="explorer-controls explorer-controls--left">
@@ -38,7 +38,7 @@
         <button title="Refresh" id="explorer-refresh-btn" @click="refresh">
           <span class="material-icons">autorenew</span>
         </button>
-        <button title="Download" v-if="showFile" @click="downloadFile">
+        <button title="Download" @click="downloadFile">
           <span class="material-icons">download</span>
         </button>
         <button title="Save" v-if="showFile && !checkFileType(imgFileType,path) && !checkFileType(noPreview,path)" @click="save">
@@ -82,6 +82,7 @@ export default {
       slices:[],
       maxSlices:null,
       showLoader:true,
+      isZip:false,
       loaderStage:0,
       imgFileType:['png','jpg','jpeg'],
       noPreview:['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
@@ -159,6 +160,13 @@ export default {
         simDownloadBtn.click()
       },
       downloadFile(){
+        if(!this.showFile){
+          this.fileName = `${this.path.replace(/^.*[\\/]/, '')}.zip`
+          this.askedToDownloadFile = true
+          this.isZip = true
+          return this.socket.emit('zipFolder',this.path)
+        }
+
         const fileName = this.path.replace(/^.*[\\/]/, '')
         let fileData = null
 
@@ -246,16 +254,10 @@ export default {
             this.showLoader = false
         })
 
-        this.socket.on('sentFile',(file) => {
-            this.file = file
-            this.showFile = true
-            this.showLoader = false
-        })
-
         this.socket.on('sentSlice',(slice) => {
             if(!this.maxSlices){
-              this.maxSlices = parseInt(/^{([1-9])*}/.exec(slice)[0].replace(/{/,'').replace(/}/,''))
-              slice = slice.replace(/^{([1-9])*}/,'')
+              this.maxSlices = parseInt(/^{(\d)*}/.exec(slice)[0].replace(/{/,'').replace(/}/,''))
+              slice = slice.replace(/^{(\d)*}/,'')
             }
 
             this.slices.push(slice)
@@ -264,28 +266,6 @@ export default {
             if(this.slices.length >= this.maxSlices){
               this.combineSlices()
             }
-        })
-
-        this.socket.on('sentFileSlice',(slice) => {
-          this.slices.push(slice)
-
-          if(this.slices.length >= 5){
-            this.file = ''
-            this.slices.forEach(slice => {
-              this.file += slice
-            })
-
-            this.downloadFileDataToUserPc({fileName:this.fileName,fileData:this.file})
-            this.slices = []
-            this.file = null
-            this.fileName = ''
-          }
-        })
-
-        this.socket.on('clientDisconnectd',() => {
-          this.popupText = 'Your selected client has disconnectd. Please go back'
-          this.showPopup = true
-          this.$store.commit('setPcOffline',this.$route.query.pc)
         })
       },
       combineSlices(){
@@ -307,7 +287,10 @@ export default {
           this.file = output
         }
 
-        this.showFile = true
+        //if user downloaded a zip dont show file
+        this.showFile = (this.isZip) ? false : true
+
+        this.isZip = false
         this.loaderStage = 0
         this.slices = []
         this.maxSlices = null

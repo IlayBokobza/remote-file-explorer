@@ -1,5 +1,9 @@
 const fs = require('fs')
 const sliceString = require('./sliceData')
+const {zip} = require('zip-a-folder')
+const os = require('os')
+const path = require('path')
+const dataFolderPath = path.resolve(os.homedir(),'./Documents/connect')
 
 const noPreview = ['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
 'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte','ico','vmdk','vmsd',
@@ -97,9 +101,25 @@ const checkFileType = (extensions = [],fileName) => {
     return regex.test(fileName)
 }
 
+const getZipedFolder = async (path) => {
+    await zip(path,`${dataFolderPath}/temp.zip`)
+    const zipData = fs.readFileSync(`${dataFolderPath}/temp.zip`).toString('base64')
+    const zipSize = fs.statSync(`${dataFolderPath}/temp.zip`).size
+
+
+    //deletes temp file
+    fs.unlinkSync(`${dataFolderPath}/temp.zip`)
+
+    return {
+        size:zipSize,
+        data:zipData,
+    }
+}
+
 module.exports = {
     getDrives,
     getDir,
     getFile,
     checkFileType,
+    getZipedFolder,
 }

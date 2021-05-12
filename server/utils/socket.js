@@ -95,11 +95,6 @@ const socketEvents = (io) => {
             socket.to(client).emit('getFile',path)
         })
 
-        //when client sends file
-        socket.on('sentFile',(file) => {
-            socket.to(admin).emit('sentFile',file)
-        })
-
         //when sent slice
         socket.on('sentSlice',(slice) => {
             socket.to(admin).emit('sentSlice',slice)
@@ -110,21 +105,15 @@ const socketEvents = (io) => {
             socket.to(client).emit('saveFile',file)
         })
 
-        //asks for a big file download
-        socket.on('sendBigFile',(path) => {
-            socket.to(client).emit('sendBigFile',path)
-        })
-
-        //recives a slice of a file from server
-        socket.on('sentFileSlice',(slice) => {
-            socket.to(admin).emit('sentFileSlice',slice)
+        //when admin asks for a ziped folder
+        socket.on('zipFolder',(path) => {
+            socket.to(client).emit('zipFolder',path)
         })
 
         //when the scocket disconnects
         socket.on('disconnect',async () => {
             if(me === 'client'){
                 try {
-                    console.log('here')
                     const user = await User.findOne({code})
                     
                     if(!user){
