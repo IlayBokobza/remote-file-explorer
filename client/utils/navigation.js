@@ -7,7 +7,7 @@ const dataFolderPath = path.resolve(os.homedir(),'./Documents/connect')
 
 const noPreview = ['bpm','tiff','psd','xls','doc','docx','odt','zip','rar','7z','tar',
 'iso','mdb','accde','frm','sqlite','exe','dll','so','class','jar','dat','ttf','tte','ico','vmdk','vmsd',
-'vmx','vmxf','nvram','wt','bson','mdmp']
+'vmx','vmxf','nvram','wt','bson','mdmp','pdf']
 
 const getDrives = () => {
     const letters = require('./lettter')

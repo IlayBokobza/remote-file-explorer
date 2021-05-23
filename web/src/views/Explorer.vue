@@ -25,6 +25,8 @@
       <p class="title" v-else-if="dir.length === 0 && !showLoader">No files in directory</p>
       <!-- image display -->
       <img :src="'data:image/png;base64, '+file" v-if="showFile && checkFileType(imgFileType,path)">
+      <!-- pdf preview -->
+      <PdfPreview v-else-if="showFile && checkFileType(['pdf'],path)" :base64="file" />
       <!-- file editor -->
       <textarea class="explorer-editor" v-else-if="showFile && !checkFileType(noPreview,path)" v-model="file"></textarea>
       <!-- no preview -->
@@ -66,8 +68,9 @@ import path from 'path'
 import ProgressLoader from '../components/ProgressLoader.vue'
 import Popup from '../components/Popup.vue'
 import Loader from '../components/Loader.vue'
+import PdfPreview from '../components/PdfPreview.vue'
 export default {
-  components: { ProgressLoader, Popup, Loader},
+  components: { ProgressLoader, Popup, Loader, PdfPreview},
   name: 'explorer',
   data(){
     return{
