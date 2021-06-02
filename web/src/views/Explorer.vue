@@ -55,10 +55,15 @@
         <button title="Settings">
           <span class="material-icons">settings</span>
         </button>
+        <button @click="showDownloadPopup = true" title="Download Client Software">
+          <span class="material-icons">help_outline</span>
+        </button>
       </div>
       <!-- popup -->
       <Popup title="Error" :text="popupText+' Please Go Back'" removeCancel="true" acceptText="Go Back"
         v-if="showPopup" @closed="showPopup = false;$router.push({path:'pc-selector'})" />
+      <!-- download popup -->
+      <Popup v-if="showDownloadPopup" @cancel="showDownloadPopup = false" @accept="downloadClientSoftware" title="Download?" text="Do you want to download the client side software?" acceptText="Download" />
   </div>
 </template>
 
@@ -93,7 +98,9 @@ export default {
       'tte','ico','vmdk','vmsd','vmx','vmxf','nvram','wt','bson','mdmp'],
       //popup
       showPopup:false,
-      popupText:null
+      popupText:null,
+      //download popup
+      showDownloadPopup:false,
     }
   },
   created(){
@@ -331,6 +338,9 @@ export default {
         const ref = document.getElementById('explorer-refresh-btn')
         ref.classList.add('spin')
         setTimeout(() => {ref.classList.remove('spin')},200)
+      },
+      downloadClientSoftware(){
+        window.location = '/files/client-software'
       }
   },
   computed:{

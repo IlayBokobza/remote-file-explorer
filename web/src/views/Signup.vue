@@ -63,6 +63,7 @@ export default {
             axios.post('/api/users/signup',formData).then(res => {
                 localStorage.setItem('token',res.data.token)
                 this.$store.commit('setUser',res.data.user)
+                location.reload()
             }).catch(err => {
                 this.feedback = err.response.data
             })

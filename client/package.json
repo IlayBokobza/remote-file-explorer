@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "pkg -t node14-win -o connect-client index.js"
+    "build": "pkg -t node14-win -o ../server/utils/connect-client index.js"
   },
   "keywords": [],
   "author": "",

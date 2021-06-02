@@ -52,7 +52,7 @@ export default {
     animation: backroundFade .7s forwards;
 
     &__container{
-        width: 50rem;
+        width: 50rem !important;
         height: 30rem;
         box-shadow: 5px 4px 14px 3px rgba(#000, .3);
         background: #cecece;

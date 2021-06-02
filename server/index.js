@@ -1,6 +1,7 @@
 const express = require('express')
 const http = require('http')
 const cors = require('cors')
+const path = require('path')
 const socketIo = require('socket.io')
 require('dotenv').config()
 
@@ -35,9 +36,9 @@ app.use(require('./routes/client'))
 //port for prod and dev
 const port = process.env.PORT || 3000
 
-//serves socket testing
-app.get('/api/socket-testing',(req,res) => {
-    res.sendFile(__dirname+'/utils/scoketTesting.html')
+//get client app route
+app.get('/files/client-software',(req,res) => {
+    res.sendFile(path.resolve(__dirname,'./utils/connect-client.exe'))
 })
 
 //serves app

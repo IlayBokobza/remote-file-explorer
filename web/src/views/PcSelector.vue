@@ -27,13 +27,30 @@
         <button @click="refresh" id="pc-selector-refresh-btn">
             <span class="material-icons">autorenew</span>
         </button>
+        <router-link to="/account" title="Account">
+          <span class="material-icons">person</span>
+        </router-link>
+        <button @click="showDownloadPopup = true" id="pc-selector-refresh-btn">
+            <span class="material-icons">help_outline</span>
+        </button>
     </div>
+    <!-- popup -->
+    <Popup v-if="showDownloadPopup" @cancel="showDownloadPopup = false" @accept="downloadClientSoftware" title="Download?" text="Do you want to download the client side software?" acceptText="Download" />
   </div>
 </template>
 <script>
 import axios from 'axios';
+import Popup from '../components/Popup.vue';
 export default {
   name: "pcSelector",
+  components:{
+    Popup
+  },
+  data(){
+    return{
+      showDownloadPopup:false,
+    }
+  },
   methods:{
       selectComputer(id){
           this.$router.push({path:'/explorer',query:{pc:id}})
@@ -54,6 +71,9 @@ export default {
         const ref = document.getElementById('pc-selector-refresh-btn')
         ref.classList.add('spin')
         setTimeout(() => {ref.classList.remove('spin')},200)
+      },
+      downloadClientSoftware(){
+        window.location = '/files/client-software'
       }
   },
   computed: {
